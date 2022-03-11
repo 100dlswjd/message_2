@@ -4,7 +4,7 @@ import win32gui
 from PySide6.QtCore import Slot, QObject, Signal, QEvent
 from PySide6.QtWidgets import QMainWindow, QApplication, QListWidgetItem, QDialog, QWidget
 from PySide6.QtNetwork import QTcpSocket
-from PySide6.QtGui import Qt, QKeyEvent 
+from PySide6.QtGui import Qt, QKeyEvent, QCloseEvent
 
 from client_form import Ui_mainWindow
 from name_set import Ui_Form
@@ -40,15 +40,12 @@ class name_set(QDialog, Ui_Form):
         self.close()
         
 class Mainwindow(QMainWindow, Ui_mainWindow):
-    winname = "ddatG-Clinet"
-    check = win32gui.FindWindow(None, winname)
     def __init__(self):
         super(Mainwindow, self).__init__()
         self.setupUi(self)
         self.bind_flag = False
         self._ip = ""
         self.name = "알수없음"
-        print(self.check)
 
         self.action_name_set.triggered.connect(self.triggered_handler)
 
@@ -159,7 +156,10 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
         self.lineEdit_message.clear()
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = Mainwindow()
-    window.show()
-    app.exec()
+    winname = "ddatG-Client"
+    check = win32gui.FindWindow(None, winname)
+    if not check:
+        app = QApplication(sys.argv)
+        window = Mainwindow()
+        window.show()
+        app.exec()
