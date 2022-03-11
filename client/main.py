@@ -1,4 +1,5 @@
 import sys
+import win32gui
 
 from PySide6.QtCore import Slot, QObject, Signal, QEvent
 from PySide6.QtWidgets import QMainWindow, QApplication, QListWidgetItem, QDialog, QWidget
@@ -39,12 +40,15 @@ class name_set(QDialog, Ui_Form):
         self.close()
         
 class Mainwindow(QMainWindow, Ui_mainWindow):
+    winname = "ddatG-Clinet"
+    check = win32gui.FindWindow(None, winname)
     def __init__(self):
         super(Mainwindow, self).__init__()
         self.setupUi(self)
         self.bind_flag = False
         self._ip = ""
         self.name = "알수없음"
+        print(self.check)
 
         self.action_name_set.triggered.connect(self.triggered_handler)
 
