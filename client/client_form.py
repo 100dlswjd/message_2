@@ -26,6 +26,7 @@ class Ui_mainWindow(object):
         if not mainWindow.objectName():
             mainWindow.setObjectName(u"mainWindow")
         mainWindow.resize(268, 527)
+        mainWindow.setInputMethodHints(Qt.ImhMultiLine)
         self.actionserver_ip = QAction(mainWindow)
         self.actionserver_ip.setObjectName(u"actionserver_ip")
         self.action_name_set = QAction(mainWindow)
@@ -57,6 +58,8 @@ class Ui_mainWindow(object):
 
         self.listWidget = QListWidget(self.centralwidget)
         self.listWidget.setObjectName(u"listWidget")
+        self.listWidget.setInputMethodHints(Qt.ImhMultiLine)
+        self.listWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.verticalLayout.addWidget(self.listWidget)
 

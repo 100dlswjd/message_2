@@ -45,6 +45,7 @@ class Ui_mainWindow(object):
 
         self.listWidget = QListWidget(self.centralwidget)
         self.listWidget.setObjectName(u"listWidget")
+        self.listWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.verticalLayout.addWidget(self.listWidget)
 

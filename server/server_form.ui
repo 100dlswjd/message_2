@@ -30,7 +30,11 @@
      </layout>
     </item>
     <item>
-     <widget class="QListWidget" name="listWidget"/>
+     <widget class="QListWidget" name="listWidget">
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
