@@ -72,18 +72,16 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
         
     @Slot()
     def client_readyRead_handler(self):
-        for client in self._client_list:
-            flag = True
-            if client.bytesAvailable():
-                data = bytes(client.readAll())
+        for read_client in self._client_list:
+            if read_client.bytesAvailable():
+                data = bytes(read_client.readAll())
                 data_decode = data.decode()
                 self._item.setTextAlignment(Qt.AlignLeft)
                 self.listWidget.addItem(data_decode)
                 self.listWidget.scrollToBottom()
-                flag = False
-
-            if flag:
-                client.write(data_decode.encode())
+                for message_client in self._client_list:
+                    if not message_client == read_client:
+                        message_client.write(data)
 
     @Slot()
     def disconnected_handler(self):
