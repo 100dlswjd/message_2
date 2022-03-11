@@ -25,8 +25,6 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
         super(Mainwindow, self).__init__()
         self.setupUi(self)
         self._client_list = list()
-        self._item = QListWidgetItem()
-
         self._server = QTcpServer()
         self._server.listen(port = 9500)
         self._server.newConnection.connect(self.newConnection_handler)
@@ -57,7 +55,7 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
 
     @Slot()
     def newConnection_handler(self):
-        self._client_list.append(self._server.nextPendingConnection())
+        self._client_list.append(self._server.nextPendingConnection())        
         add_message = "새로운 사용자가 연결 하였습니다. !"
         item = QListWidgetItem()
         item.setText(add_message)
@@ -74,24 +72,52 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
     def client_readyRead_handler(self):
         for read_client in self._client_list:
             if read_client.bytesAvailable():
+                # 명령어 코드 읽고 판단해줘야함 !
                 data = bytes(read_client.readAll())
                 data_decode = data.decode()
-                self._item.setTextAlignment(Qt.AlignLeft)
-                self.listWidget.addItem(data_decode)
-                self.listWidget.scrollToBottom()
-                for message_client in self._client_list:
-                    if not message_client == read_client:
-                        message_client.write(data)
 
+                if data_decode[0] == "@":
+                    print(data_decode)
+                    data_decode = data_decode[1:]
+                    data_decode = data_decode.split("_")
+                    item = QListWidgetItem()
+                    item.setText(f"{data_decode[0]} -> {data_decode[1]} 로 변경")
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.listWidget.addItem(item)
+                    self.listWidget.scrollToBottom()
+
+                elif data_decode[0] == "!":                    
+                    data_decode = data_decode[1:]
+                    if data_decode[-3:] == "!pc":
+                        data_decode = data_decode.split(":")
+                        item = QListWidgetItem()
+                        item.setText(f"{data_decode[0]}에서 인원수 조사함 !")
+                        item.setTextAlignment(Qt.AlignCenter)
+                        self.listWidget.addItem(item)
+                        message = f"서버 : {len(self._client_list)}명이 연결되어있습니다."                        
+                        read_client.write(message.encode())
+                    else:
+                        item = QListWidgetItem()
+                        item.setText(data_decode)
+                        item.setTextAlignment(Qt.AlignLeft)
+                        self.listWidget.addItem(item)
+                        self.listWidget.scrollToBottom()
+
+                        #message_clinet 는 서버에서 메시지를 보낼 클라이언트임
+                        for message_client in self._client_list:
+                            if not message_client == read_client:
+                                message_client.write(data)
+    
     @Slot()
     def disconnected_handler(self):
         add_message = "한명의 사용자가 떠났습니다... 흙흙"
+        disconnect_client = self.sender()
+        self._client_list.remove(disconnect_client)
         item = QListWidgetItem()
         item.setText(add_message)
         item.setTextAlignment(Qt.AlignCenter)
         self.listWidget.addItem(item)
         self.listWidget.scrollToBottom()
-        print(self._client_list)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

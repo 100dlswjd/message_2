@@ -73,13 +73,21 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
     @Slot()
     def triggered_handler(self):
         flag, name = name_set.result(name_set())
-        print(flag)
         if flag:
+            befor_name = self.name
+            if len(name) > 10:
+                name = name[:10]
             self.name = name
-            print(self.name)
+            opcode = "@"
+            opcode += befor_name
+            opcode += "_"
+            opcode += self.name
+            self._sock.write(opcode.encode())
 
     @Slot()
     def disconnect_handler(self):
+        self.label.setText("연결이 해제되었습니다.")
+        self.btn_ip_set.click()
         message = "연결이 해제되었습니다. !"
         item = QListWidgetItem()
         item.setText(message)
@@ -137,10 +145,10 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
 
     @Slot()
     def btn_message_handler(self):
-        message = f"{self.name} : {self.lineEdit_message.text()}"
+        message = f"!{self.name} : {self.lineEdit_message.text()}"
         self._sock.write(message.encode())
         item = QListWidgetItem()
-        item.setText(message)
+        item.setText(message[1:])
         item.setTextAlignment(Qt.AlignRight)
         self.listWidget.addItem(item)
         self.listWidget.scrollToBottom()
