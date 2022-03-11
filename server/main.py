@@ -1,4 +1,3 @@
-from signal import signal
 import sys
 import socket
 
@@ -57,6 +56,8 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
     def newConnection_handler(self):
         self._client_list.append(self._server.nextPendingConnection())        
         add_message = "새로운 사용자가 연결 하였습니다. !"
+        for clients in self._client_list:
+            clients.write(add_message.encode())
         item = QListWidgetItem()
         item.setText(add_message)
         item.setTextAlignment(Qt.AlignCenter)
@@ -77,11 +78,10 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
                 data_decode = data.decode()
 
                 if data_decode[0] == "@":
-                    print(data_decode)
                     data_decode = data_decode[1:]
                     data_decode = data_decode.split("_")
                     item = QListWidgetItem()
-                    item.setText(f"{data_decode[0]} -> {data_decode[1]} 로 변경")
+                    item.setText(f"{data_decode[0]} -> {data_decode[1]}")
                     item.setTextAlignment(Qt.AlignCenter)
                     self.listWidget.addItem(item)
                     self.listWidget.scrollToBottom()
@@ -106,18 +106,26 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
                         #message_clinet 는 서버에서 메시지를 보낼 클라이언트임
                         for message_client in self._client_list:
                             if not message_client == read_client:
-                                message_client.write(data)
+                                message_client.write(data_decode.encode())
+                else:
+                    item = QListWidgetItem()
+                    item.setText("↖"+data_decode+"↗")
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.listWidget.addItem(item)
+                    self.listWidget.scrollToBottom()
     
     @Slot()
     def disconnected_handler(self):
         add_message = "한명의 사용자가 떠났습니다... 흙흙"
-        disconnect_client = self.sender()
-        self._client_list.remove(disconnect_client)
         item = QListWidgetItem()
         item.setText(add_message)
         item.setTextAlignment(Qt.AlignCenter)
         self.listWidget.addItem(item)
         self.listWidget.scrollToBottom()
+        disconnect_client = self.sender()
+        self._client_list.remove(disconnect_client)
+        for clients in self._client_list:
+            clients.write(add_message.encode())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

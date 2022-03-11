@@ -1,5 +1,7 @@
 import sys
 import win32gui
+import socket
+import time
 
 from PySide6.QtCore import Slot, QObject, Signal, QEvent
 from PySide6.QtWidgets import QMainWindow, QApplication, QListWidgetItem, QDialog, QWidget
@@ -46,6 +48,7 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
         self.bind_flag = False
         self._ip = ""
         self.name = "알수없음"
+        self.client_ip = socket.gethostbyname(socket.gethostname())
 
         self.action_name_set.triggered.connect(self.triggered_handler)
 
@@ -84,6 +87,8 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
             opcode += "_"
             opcode += self.name
             self._sock.write(opcode.encode())
+            change_text = " 으로 변경\n"+ "↖" + self.client_ip + "↗"
+            self._sock.write(change_text.encode())
 
     @Slot()
     def disconnect_handler(self):
@@ -107,8 +112,8 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
             self.listWidget.scrollToBottom()
 
     @Slot()
-    def connect_handler(self):
-        message = "접속 되었습니다."
+    def connect_handler(self):        
+        message = "접속 되었습니다."        
         item = QListWidgetItem()
         item.setText(message)
         item.setTextAlignment(Qt.AlignCenter)
@@ -116,12 +121,19 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
         self.listWidget.scrollToBottom()
         self.btn_ip_set.setText("연결 끊기")
         self.bind_flag = True
+        self._sock.write(self.client_ip.encode())
 
     @Slot()
     def readyRead_handler(self):
         if self._sock.bytesAvailable():
             data = bytes(self._sock.readAll())
             data = data.decode()
+            
+            if data[-5:] == "@list":
+                text = self.name + " -> " + self.client_ip
+                self._sock.write(text.encode())
+                return 0
+                
             item = QListWidgetItem()
             item.setText(data)
             item.setTextAlignment(Qt.AlignLeft)
