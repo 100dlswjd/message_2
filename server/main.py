@@ -1,9 +1,10 @@
 import sys
 import socket
 
+from qt_material import apply_stylesheet
 from PySide6.QtCore import Slot, QObject, Signal, QEvent
 from PySide6.QtWidgets import QMainWindow, QApplication, QListWidgetItem, QWidget
-from PySide6.QtNetwork import QTcpServer, QTcpSocket
+from PySide6.QtNetwork import QTcpServer
 from PySide6.QtGui import Qt, QKeyEvent
 
 from server_form import Ui_mainWindow
@@ -41,16 +42,19 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
 
     @Slot()
     def button_handler(self):
-        text = "운영자 : "
-        text += self.lineEdit_message.text()
-        for client in self._client_list:
-            client.write(text.encode())
-        item = QListWidgetItem()
-        item.setText(text)
-        item.setTextAlignment(Qt.AlignRight)
-        self.listWidget.addItem(item)
-        self.listWidget.scrollToBottom()
-        self.lineEdit_message.clear()
+        if len(self.lineEdit_message.text()) > 0:
+            text = "운영자 : "
+            text += self.lineEdit_message.text()
+            #if text[-5]
+
+            item = QListWidgetItem()
+            item.setText(text)
+            item.setTextAlignment(Qt.AlignRight)
+            for client in self._client_list:
+                client.write(text.encode())
+            self.listWidget.addItem(item)
+            self.listWidget.scrollToBottom()
+            self.lineEdit_message.clear()
 
     @Slot()
     def newConnection_handler(self):
@@ -68,7 +72,6 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
             client.readyRead.connect(self.client_readyRead_handler)
             self.disconnect_client = client.disconnected.connect(self.disconnected_handler)
             
-        
     @Slot()
     def client_readyRead_handler(self):
         for read_client in self._client_list:
@@ -94,8 +97,10 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
                         item.setText(f"{data_decode[0]}에서 인원수 조사함 !")
                         item.setTextAlignment(Qt.AlignCenter)
                         self.listWidget.addItem(item)
+                        self.listWidget.scrollToBottom()
                         message = f"서버 : {len(self._client_list)}명이 연결되어있습니다."                        
                         read_client.write(message.encode())
+                        
                     else:
                         item = QListWidgetItem()
                         item.setText(data_decode)
@@ -130,5 +135,7 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = Mainwindow()
+    #app.setStyle('Fusion')
+    apply_stylesheet(app, theme = 'dark_teal.xml')
     window.show()
     app.exec()

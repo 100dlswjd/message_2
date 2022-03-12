@@ -3,6 +3,7 @@ import win32gui
 import socket
 import time
 
+from qt_material import apply_stylesheet
 from PySide6.QtCore import Slot, QObject, Signal, QEvent
 from PySide6.QtWidgets import QMainWindow, QApplication, QListWidgetItem, QDialog, QWidget
 from PySide6.QtNetwork import QTcpSocket
@@ -129,7 +130,7 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
             data = bytes(self._sock.readAll())
             data = data.decode()
             
-            if data[-5:] == "@list":
+            if data[-10:] == "@list_info":
                 text = self.name + " -> " + self.client_ip
                 self._sock.write(text.encode())
                 return 0
@@ -158,14 +159,15 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
 
     @Slot()
     def btn_message_handler(self):
-        message = f"!{self.name} : {self.lineEdit_message.text()}"
-        self._sock.write(message.encode())
-        item = QListWidgetItem()
-        item.setText(message[1:])
-        item.setTextAlignment(Qt.AlignRight)
-        self.listWidget.addItem(item)
-        self.listWidget.scrollToBottom()
-        self.lineEdit_message.clear()
+        if len(self.lineEdit_message.text()) > 0:
+            message = f"!{self.name} : {self.lineEdit_message.text()}"
+            self._sock.write(message.encode())
+            item = QListWidgetItem()
+            item.setText(message[1:])
+            item.setTextAlignment(Qt.AlignRight)
+            self.listWidget.addItem(item)
+            self.listWidget.scrollToBottom()
+            self.lineEdit_message.clear()
 
 if __name__ == "__main__":
     winname = "ddatG-Client"
@@ -173,5 +175,7 @@ if __name__ == "__main__":
     if not check:
         app = QApplication(sys.argv)
         window = Mainwindow()
+        #app.setStyle('Fusion')
+        apply_stylesheet(app, theme = 'dark_teal.xml')
         window.show()
         app.exec()
