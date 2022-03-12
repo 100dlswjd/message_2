@@ -45,16 +45,31 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
         if len(self.lineEdit_message.text()) > 0:
             text = "운영자 : "
             text += self.lineEdit_message.text()
-            #if text[-5]
-
             item = QListWidgetItem()
-            item.setText(text)
-            item.setTextAlignment(Qt.AlignRight)
-            for client in self._client_list:
-                client.write(text.encode())
-            self.listWidget.addItem(item)
-            self.listWidget.scrollToBottom()
-            self.lineEdit_message.clear()
+            if text[-5:] == "@list":
+                message = f"현재 연결 수 : {len(self._client_list)}"
+                item.setText(message)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.listWidget.addItem(item)
+                self.listWidget.scrollToBottom()
+                self.lineEdit_message.clear()
+
+            elif text[-5:] == "@help":
+                text = "@list : 연결된 수 \n@list_info : 닉네임, ip 표시"
+                item.setText(text)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.listWidget.addItem(item)
+                self.listWidget.scrollToBottom()
+                self.lineEdit_message.clear()
+
+            else:
+                item.setText(text)
+                item.setTextAlignment(Qt.AlignRight)
+                for client in self._client_list:
+                    client.write(text.encode())
+                self.listWidget.addItem(item)
+                self.listWidget.scrollToBottom()
+                self.lineEdit_message.clear()
 
     @Slot()
     def newConnection_handler(self):
@@ -79,11 +94,11 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
                 # 명령어 코드 읽고 판단해줘야함 !
                 data = bytes(read_client.readAll())
                 data_decode = data.decode()
+                item = QListWidgetItem()
 
                 if data_decode[0] == "@":
                     data_decode = data_decode[1:]
                     data_decode = data_decode.split("_")
-                    item = QListWidgetItem()
                     item.setText(f"{data_decode[0]} -> {data_decode[1]}")
                     item.setTextAlignment(Qt.AlignCenter)
                     self.listWidget.addItem(item)
@@ -93,7 +108,6 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
                     data_decode = data_decode[1:]
                     if data_decode[-3:] == "!pc":
                         data_decode = data_decode.split(":")
-                        item = QListWidgetItem()
                         item.setText(f"{data_decode[0]}에서 인원수 조사함 !")
                         item.setTextAlignment(Qt.AlignCenter)
                         self.listWidget.addItem(item)
@@ -101,8 +115,11 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
                         message = f"서버 : {len(self._client_list)}명이 연결되어있습니다."                        
                         read_client.write(message.encode())
                         
+                    elif data_decode[-5:] == "!help":
+                        message = "!pc : 접속된 사용자의 수\n"
+                        read_client.write(message.encode())                        
+
                     else:
-                        item = QListWidgetItem()
                         item.setText(data_decode)
                         item.setTextAlignment(Qt.AlignLeft)
                         self.listWidget.addItem(item)

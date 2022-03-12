@@ -134,7 +134,7 @@ class Mainwindow(QMainWindow, Ui_mainWindow):
                 text = self.name + " -> " + self.client_ip
                 self._sock.write(text.encode())
                 return 0
-                
+
             item = QListWidgetItem()
             item.setText(data)
             item.setTextAlignment(Qt.AlignLeft)
@@ -176,6 +176,6 @@ if __name__ == "__main__":
         app = QApplication(sys.argv)
         window = Mainwindow()
         #app.setStyle('Fusion')
-        apply_stylesheet(app, theme = 'dark_teal.xml')
+        apply_stylesheet(app, theme = 'dark_blue.xml')
         window.show()
         app.exec()
