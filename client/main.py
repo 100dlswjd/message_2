@@ -179,3 +179,4 @@ if __name__ == "__main__":
         apply_stylesheet(app, theme = 'dark_blue.xml')
         window.show()
         app.exec()
+        
